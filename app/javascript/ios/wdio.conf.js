@@ -31,13 +31,15 @@ exports.config = {
       "appium:platformVersion": "18",
       "appium:automationName": "XCUITest",
       "bstack:options": {
-        projectName: "sca-nexus-app-wdio-ios",
+        projectName: "sca-nexus-app-javascript-ios",
         buildName: "browserstack-build-1",
         sessionName: "voiceover-smoke",
         debug: true,
         networkLogs: true,
         // Required so VoiceOver executors work.
         voiceOver: true,
+        // WDIO App Accessibility sample pattern: also declare on caps.
+        accessibility: true,
       },
     },
   ],
@@ -54,8 +56,11 @@ exports.config = {
   // wraps workers in xvfb-run and crashes on ubuntu-latest (write EINVAL).
   autoXvfb: false,
 
-  // Matches BrowserStack docs JavaScript tab for screenReaderAutomation.
+  // Matches BrowserStack WDIO App Accessibility + Screen Reader docs.
   // `app` on the service uploads the local binary and sets appium:app to bs://…
+  // Keep screenReaderAutomationReport (WDIO docs) + screenReaderAutomation
+  // (generate-report JS tab). Successful CI runs previously logged srAutomation:false
+  // with only the nested object, so projects never appeared on the SR dashboard.
   services: [
     [
       "browserstack",
@@ -63,10 +68,17 @@ exports.config = {
         app: { path: iosApp },
         accessibility: true,
         accessibilityOptions: {
+          // Legacy flag called out on the WDIO integrate page.
+          screenReaderAutomationReport: true,
           screenReaderAutomation: {
             autoReport: true,
             linearNavigation: true,
             linearNavigationTimeout: 300000,
+          },
+          wcagVersion: "wcag22aa",
+          scannerProcessingTimeout: 10,
+          includeIssueType: {
+            bestPractice: false,
           },
         },
       },

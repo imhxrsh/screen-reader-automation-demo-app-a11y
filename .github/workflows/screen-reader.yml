@@ -98,8 +98,8 @@ jobs:
           case "${{ inputs.suite }}" in
             testng-android) LABEL="TestNG + Android (TalkBack)"; PROJECT="sca-nexus-app-testng-android" ;;
             testng-ios) LABEL="TestNG + iOS (VoiceOver)"; PROJECT="sca-nexus-app-testng-ios" ;;
-            javascript-android) LABEL="WebdriverIO + Android (TalkBack)"; PROJECT="sca-nexus-app-wdio-android" ;;
-            javascript-ios) LABEL="WebdriverIO + iOS (VoiceOver)"; PROJECT="sca-nexus-app-wdio-ios" ;;
+            javascript-android) LABEL="WebdriverIO + Android (TalkBack)"; PROJECT="sca-nexus-app-javascript-android" ;;
+            javascript-ios) LABEL="WebdriverIO + iOS (VoiceOver)"; PROJECT="sca-nexus-app-javascript-ios" ;;
             *) fail "Unknown suite: ${{ inputs.suite }}" ;;
           esac
 

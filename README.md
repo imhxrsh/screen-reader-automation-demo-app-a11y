@@ -48,8 +48,8 @@ Nexus Demo binaries are already in the repo (`apps/NexusDemo.apk` / `apps/NexusD
 | --- | --- |
 | `testng-android` | `sca-nexus-app-testng-android` |
 | `testng-ios` | `sca-nexus-app-testng-ios` |
-| `javascript-android` | `sca-nexus-app-wdio-android` |
-| `javascript-ios` | `sca-nexus-app-wdio-ios` |
+| `javascript-android` | `sca-nexus-app-javascript-android` |
+| `javascript-ios` | `sca-nexus-app-javascript-ios` |
 
 Credentials are masked in job logs (`***`). Prefer a private repo so the Actions “Run workflow” form is not visible to others.
 

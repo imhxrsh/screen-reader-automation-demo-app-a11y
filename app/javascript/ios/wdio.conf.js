@@ -48,6 +48,10 @@ exports.config = {
     timeout: 600000,
   },
 
+  // Cloud Appium on BrowserStack needs no local display. Leaving autoXvfb on
+  // wraps workers in xvfb-run and crashes on ubuntu-latest (write EINVAL).
+  autoXvfb: false,
+
   // Matches BrowserStack docs JavaScript tab for screenReaderAutomation.
   services: [
     [

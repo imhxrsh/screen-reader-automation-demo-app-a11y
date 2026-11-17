@@ -25,8 +25,9 @@ const accessibilityOptions = {
   screenReaderAutomationReport: true,
   screenReaderAutomation: {
     autoReport: true,
-    linearNavigation: true,
-    linearNavigationTimeout: 300000,
+    // Standard mode (viewport only). linearNavigation:true made end-of-test
+    // appAllyScan hang past connectionRetryTimeout and blow the mocha timeout.
+    linearNavigation: false,
   },
   wcagVersion: "wcag22aa",
   scannerProcessingTimeout: 10,
@@ -65,9 +66,12 @@ exports.config = {
   logLevel: "info",
   framework: "mocha",
   reporters: ["spec"],
+  // App a11y / screen-reader scans can exceed the WDIO default (120s).
+  connectionRetryTimeout: 240000,
+  connectionRetryCount: 2,
   mochaOpts: {
     ui: "bdd",
-    timeout: 600000,
+    timeout: 900000,
   },
 
   // Cloud Appium on BrowserStack needs no local display. Leaving autoXvfb on

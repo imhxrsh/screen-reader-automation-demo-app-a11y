@@ -21,20 +21,21 @@ Each run launches **Nexus Demo**, opens **Standalone demo**, drives the native s
 
 No local Java/Node setup needed. Use the repo on GitHub and run from Actions.
 
-### 1. Start a run
+### 1. Add BrowserStack secrets (once)
 
-1. Open this repo on GitHub  
-2. **Actions** → **Screen Reader Automation Demo - App A11y - Nexus Demo** → **Run workflow**
+Credentials must be **repository secrets**. Do not paste them into workflow inputs — GitHub prints `workflow_dispatch` input values in the step `env:` dump, so `::add-mask::` cannot hide them.
+
+1. Repo → **Settings** → **Secrets and variables** → **Actions** → **New repository secret**
+2. Add:
+   - `BROWSERSTACK_USERNAME`
+   - `BROWSERSTACK_ACCESS_KEY`
+
+### 2. Start a run
+
+1. **Actions** → **Screen Reader Automation Demo - App A11y - Nexus Demo** → **Run workflow**
+2. Pick a **Suite** from the table below → **Run workflow**
 
 Workflow: [`.github/workflows/screen-reader.yml`](.github/workflows/screen-reader.yml)
-
-### 2. Inputs
-
-| Input | What to enter |
-| --- | --- |
-| **BrowserStack username** | Your BrowserStack username |
-| **BrowserStack access key** | Your BrowserStack access key |
-| **Suite** | One option from the table below |
 
 | Suite value | Runs |
 | --- | --- |
@@ -58,7 +59,7 @@ Nexus Demo binaries are already in the repo (`apps/NexusDemo.apk` / `apps/NexusD
 | `javascript-android` | `sca-nexus-app-wdio-android` |
 | `javascript-ios` | `sca-nexus-app-wdio-ios` |
 
-Credentials are masked in job logs. Prefer a private repo so pasted inputs are not visible in the Actions Inputs panel. You can also set repo secrets `BROWSERSTACK_USERNAME` / `BROWSERSTACK_ACCESS_KEY` and leave the text fields empty.
+Repo secrets are auto-redacted in Actions logs (shown as `***`).
 
 ---
 

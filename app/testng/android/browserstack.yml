@@ -1,0 +1,24 @@
+userName: ${BROWSERSTACK_USERNAME}
+accessKey: ${BROWSERSTACK_ACCESS_KEY}
+framework: testng
+app: ./apps/NexusDemo.apk
+platforms:
+  - platformName: android
+    deviceName: Samsung Galaxy S24
+    platformVersion: "14.0"
+parallelsPerPlatform: 1
+browserstackLocal: false
+buildName: browserstack-build-1
+projectName: sca-nexus-app-testng-android
+debug: true
+networkLogs: true
+accessibility: true
+accessibilityOptions:
+  screenReaderAutomation:
+    autoReport: true
+    linearNavigation: true
+    linearNavigationTimeout: 300000
+  wcagVersion: wcag22aa
+  includeIssueType:
+    bestPractice: false
+  scannerProcessingTimeout: 10

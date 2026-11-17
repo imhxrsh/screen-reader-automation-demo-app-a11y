@@ -1,0 +1,25 @@
+userName: ${BROWSERSTACK_USERNAME}
+accessKey: ${BROWSERSTACK_ACCESS_KEY}
+framework: testng
+app: ./apps/NexusDemo.ipa
+platforms:
+  - platformName: ios
+    deviceName: iPhone 16
+    platformVersion: "18"
+    voiceOver: true
+parallelsPerPlatform: 1
+browserstackLocal: false
+buildName: browserstack-build-1
+projectName: sca-nexus-app-testng-ios
+debug: true
+networkLogs: true
+accessibility: true
+accessibilityOptions:
+  screenReaderAutomation:
+    autoReport: true
+    linearNavigation: true
+    linearNavigationTimeout: 300000
+  wcagVersion: wcag22aa
+  includeIssueType:
+    bestPractice: false
+  scannerProcessingTimeout: 10

@@ -1,0 +1,205 @@
+name: Screen Reader Automation Demo - App A11y - Nexus Demo
+
+on:
+  workflow_dispatch:
+    inputs:
+      browserstack_username:
+        description: "BrowserStack username (pasted for this run)"
+        required: false
+        type: string
+      browserstack_access_key:
+        description: "BrowserStack access key (pasted for this run)"
+        required: false
+        type: string
+      suite:
+        description: "Which suite to run"
+        required: true
+        type: choice
+        default: testng-android
+        options:
+          - testng-android
+          - testng-ios
+          - javascript-android
+          - javascript-ios
+
+# Choice labels (Actions UI shows the option values; README maps them):
+#   testng-android      → TestNG + Android (TalkBack)
+#   testng-ios          → TestNG + iOS (VoiceOver)
+#   javascript-android  → WebdriverIO + Android (TalkBack)
+#   javascript-ios      → WebdriverIO + iOS (VoiceOver)
+
+jobs:
+  screen-reader:
+    name: Run ${{ inputs.suite }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+      ANDROID_APP: ./apps/NexusDemo.apk
+      IOS_APP: ./apps/NexusDemo.ipa
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Resolve, validate, and mask BrowserStack credentials
+        id: creds
+        env:
+          INPUT_USERNAME: ${{ inputs.browserstack_username }}
+          INPUT_ACCESS_KEY: ${{ inputs.browserstack_access_key }}
+          SECRET_USERNAME: ${{ secrets.BROWSERSTACK_USERNAME }}
+          SECRET_ACCESS_KEY: ${{ secrets.BROWSERSTACK_ACCESS_KEY }}
+        run: |
+          set -euo pipefail
+
+          trim() {
+            # shellcheck disable=SC2001
+            echo "$1" | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//'
+          }
+
+          USERNAME="$(trim "${INPUT_USERNAME:-}")"
+          ACCESS_KEY="$(trim "${INPUT_ACCESS_KEY:-}")"
+
+          # Optional fallback: repo secrets when dispatch inputs are left blank
+          if [ -z "$USERNAME" ] && [ -n "${SECRET_USERNAME:-}" ]; then
+            USERNAME="$(trim "$SECRET_USERNAME")"
+          fi
+          if [ -z "$ACCESS_KEY" ] && [ -n "${SECRET_ACCESS_KEY:-}" ]; then
+            ACCESS_KEY="$(trim "$SECRET_ACCESS_KEY")"
+          fi
+
+          fail() {
+            local msg="$1"
+            {
+              echo "## Screen reader workflow - input error"
+              echo
+              echo "**$msg**"
+              echo
+              echo "Fix: Actions → Screen reader → Run workflow."
+              echo "Paste your BrowserStack username and access key, or set repo secrets"
+              echo "\`BROWSERSTACK_USERNAME\` / \`BROWSERSTACK_ACCESS_KEY\` and leave the text fields blank."
+              echo
+              echo "Then pick one suite from the dropdown."
+            } >> "$GITHUB_STEP_SUMMARY"
+            echo "::error::$msg"
+            exit 1
+          }
+
+          if [ -z "$USERNAME" ]; then
+            fail "BrowserStack username is required."
+          fi
+          if [ -z "$ACCESS_KEY" ]; then
+            fail "BrowserStack access key is required."
+          fi
+          if [ "${#USERNAME}" -lt 3 ]; then
+            fail "BrowserStack username looks too short. Check what you pasted."
+          fi
+          if [ "${#ACCESS_KEY}" -lt 8 ]; then
+            fail "BrowserStack access key looks too short. Check what you pasted."
+          fi
+
+          # Context7 / GitHub docs: mask so values are redacted from logs
+          echo "::add-mask::$USERNAME"
+          echo "::add-mask::$ACCESS_KEY"
+
+          {
+            echo "BROWSERSTACK_USERNAME=$USERNAME"
+            echo "BROWSERSTACK_ACCESS_KEY=$ACCESS_KEY"
+          } >> "$GITHUB_ENV"
+
+          case "${{ inputs.suite }}" in
+            testng-android) LABEL="TestNG + Android (TalkBack)"; PROJECT="sca-nexus-app-testng-android" ;;
+            testng-ios) LABEL="TestNG + iOS (VoiceOver)"; PROJECT="sca-nexus-app-testng-ios" ;;
+            javascript-android) LABEL="WebdriverIO + Android (TalkBack)"; PROJECT="sca-nexus-app-wdio-android" ;;
+            javascript-ios) LABEL="WebdriverIO + iOS (VoiceOver)"; PROJECT="sca-nexus-app-wdio-ios" ;;
+            *) fail "Unknown suite: ${{ inputs.suite }}" ;;
+          esac
+
+          echo "SUITE_LABEL=$LABEL" >> "$GITHUB_ENV"
+          echo "BS_PROJECT=$PROJECT" >> "$GITHUB_ENV"
+
+          {
+            echo "## Screen reader run"
+            echo
+            echo "| Field | Value |"
+            echo "| --- | --- |"
+            echo "| Suite | $LABEL (\`${{ inputs.suite }}\`) |"
+            echo "| Credentials | provided (masked in logs) |"
+            echo "| Status | starting… |"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Set up JDK 11
+        if: startsWith(inputs.suite, 'testng-')
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "11"
+          cache: maven
+          cache-dependency-path: |
+            app/testng/android/pom.xml
+            app/testng/ios/pom.xml
+
+      - name: Set up Node.js 20
+        if: startsWith(inputs.suite, 'javascript-')
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: app/javascript/package-lock.json
+
+      - name: Install JS dependencies
+        if: startsWith(inputs.suite, 'javascript-')
+        working-directory: app/javascript
+        run: npm ci
+
+      - name: Run TestNG Android (TalkBack)
+        id: run_testng_android
+        if: inputs.suite == 'testng-android'
+        working-directory: app/testng/android
+        run: mvn -B test
+
+      - name: Run TestNG iOS (VoiceOver)
+        id: run_testng_ios
+        if: inputs.suite == 'testng-ios'
+        working-directory: app/testng/ios
+        run: mvn -B test
+
+      - name: Run WebdriverIO Android (TalkBack)
+        id: run_js_android
+        if: inputs.suite == 'javascript-android'
+        working-directory: app/javascript
+        run: npm run test:android
+
+      - name: Run WebdriverIO iOS (VoiceOver)
+        id: run_js_ios
+        if: inputs.suite == 'javascript-ios'
+        working-directory: app/javascript
+        run: npm run test:ios
+
+      - name: Job summary
+        if: always() && steps.creds.outcome == 'success'
+        run: |
+          set -euo pipefail
+          STATUS="failed"
+          if [ "${{ job.status }}" = "success" ]; then
+            STATUS="passed"
+          fi
+
+          {
+            echo
+            echo "### Result"
+            echo
+            echo "| Field | Value |"
+            echo "| --- | --- |"
+            echo "| Suite | ${SUITE_LABEL} (\`${{ inputs.suite }}\`) |"
+            echo "| Outcome | **${STATUS}** |"
+            echo "| BrowserStack project | \`${BS_PROJECT}\` |"
+            echo "| BrowserStack build | \`browserstack-build-1\` |"
+            echo
+            echo "### View the screen reader report"
+            echo
+            echo "1. Open the [App Accessibility dashboard](https://app-accessibility.browserstack.com/)."
+            echo "2. Find project **\`${BS_PROJECT}\`**, build **\`browserstack-build-1\`**."
+            echo "3. Open the Screen Reader report for this run."
+            echo
+            echo "> Credentials were masked in job logs. Avoid pasting real keys into a public repo run if the Actions Inputs panel is visible to others."
+          } >> "$GITHUB_STEP_SUMMARY"

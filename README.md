@@ -94,9 +94,11 @@ cd app/javascript
 cp .env.example .env
 # set BROWSERSTACK_USERNAME and BROWSERSTACK_ACCESS_KEY in .env
 npm install
-npm run test:android   # TalkBack
-npm run test:ios       # VoiceOver
+npm run test:android   # TalkBack (copies android/browserstack.yml → cwd)
+npm run test:ios       # VoiceOver (copies ios/browserstack.yml → cwd)
 ```
+
+JS suites need a cwd `browserstack.yml` so the BrowserStack WDIO CLI can arm Screen Reader Automation (`srAutomation`). Without it, runs stay off the Screen Reader dashboard even when `accessibilityOptions` are set in `wdio.conf.js`.
 
 Do not commit `.env` (gitignored).
 

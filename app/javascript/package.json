@@ -4,8 +4,8 @@
   "private": true,
   "description": "BrowserStack app screen reader samples (WebdriverIO + Appium)",
   "scripts": {
-    "test:android": "wdio run android/wdio.conf.js",
-    "test:ios": "wdio run ios/wdio.conf.js"
+    "test:android": "cp android/browserstack.yml ./browserstack.yml && wdio run android/wdio.conf.js",
+    "test:ios": "cp ios/browserstack.yml ./browserstack.yml && wdio run ios/wdio.conf.js"
   },
   "engines": {
     "node": ">=18"

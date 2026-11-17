@@ -1,0 +1,31 @@
+# Loaded by @wdio/browserstack-service CLI from cwd as browserstack.yml.
+# Without this file, App Accessibility sessions stay at srAutomation:false and
+# never appear on https://app-accessibility.browserstack.com/screen-reader-automation
+userName: ${BROWSERSTACK_USERNAME}
+accessKey: ${BROWSERSTACK_ACCESS_KEY}
+
+framework: wdio
+app: ./apps/NexusDemo.apk
+
+platforms:
+  - platformName: android
+    deviceName: Samsung Galaxy S24
+    platformVersion: "14.0"
+
+parallelsPerPlatform: 1
+browserstackLocal: false
+buildName: browserstack-build-1
+projectName: sca-nexus-app-javascript-android
+debug: true
+networkLogs: true
+
+accessibility: true
+accessibilityOptions:
+  screenReaderAutomation:
+    autoReport: true
+    linearNavigation: true
+    linearNavigationTimeout: 300000
+  wcagVersion: wcag22aa
+  includeIssueType:
+    bestPractice: false
+  scannerProcessingTimeout: 10

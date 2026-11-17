@@ -5,3 +5,5 @@ logs/
 .DS_Store
 npm-debug.log*
 *.log
+# Copied into cwd before each WDIO run (source of truth lives under android/ / ios/).
+/browserstack.yml

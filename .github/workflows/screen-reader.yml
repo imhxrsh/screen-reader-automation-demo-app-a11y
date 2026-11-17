@@ -3,6 +3,14 @@ name: Screen Reader Automation Demo - App A11y - Nexus Demo
 on:
   workflow_dispatch:
     inputs:
+      browserstack_username:
+        description: "BrowserStack username"
+        required: true
+        type: string
+      browserstack_access_key:
+        description: "BrowserStack access key"
+        required: true
+        type: string
       suite:
         description: "Which suite to run"
         required: true
@@ -20,9 +28,9 @@ on:
 #   javascript-android  → WebdriverIO + Android (TalkBack)
 #   javascript-ios      → WebdriverIO + iOS (VoiceOver)
 #
-# Credentials: repo secrets only (BROWSERSTACK_USERNAME / BROWSERSTACK_ACCESS_KEY).
-# workflow_dispatch text inputs are NOT secret — GitHub prints them in the step env:
-# block before ::add-mask:: can run, so pasted keys always leak in logs.
+# Credentials are pasted as workflow_dispatch inputs. Do NOT map them through
+# env: or ${{ inputs.* }} in the script — GitHub would print them in the step
+# log. Read from $GITHUB_EVENT_PATH, ::add-mask::, then export to GITHUB_ENV.
 
 jobs:
   screen-reader:
@@ -32,18 +40,20 @@ jobs:
     env:
       ANDROID_APP: ./apps/NexusDemo.apk
       IOS_APP: ./apps/NexusDemo.ipa
-      # secrets.* are auto-masked in logs (including the env: dump)
-      BROWSERSTACK_USERNAME: ${{ secrets.BROWSERSTACK_USERNAME }}
-      BROWSERSTACK_ACCESS_KEY: ${{ secrets.BROWSERSTACK_ACCESS_KEY }}
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Validate credentials and suite
+      - name: Resolve, validate, and mask BrowserStack credentials
         id: creds
         run: |
           set -euo pipefail
+
+          trim() {
+            # shellcheck disable=SC2001
+            echo "$1" | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//'
+          }
 
           fail() {
             local msg="$1"
@@ -52,20 +62,38 @@ jobs:
               echo
               echo "**$msg**"
               echo
-              echo "Fix: Settings → Secrets and variables → Actions → New repository secret."
-              echo "Add \`BROWSERSTACK_USERNAME\` and \`BROWSERSTACK_ACCESS_KEY\`,"
-              echo "then Actions → this workflow → Run workflow → pick a suite."
+              echo "Fix: Actions → this workflow → Run workflow."
+              echo "Paste BrowserStack username and access key, then pick a suite."
             } >> "$GITHUB_STEP_SUMMARY"
             echo "::error::$msg"
             exit 1
           }
 
-          if [ -z "${BROWSERSTACK_USERNAME:-}" ]; then
-            fail "Missing secret BROWSERSTACK_USERNAME."
+          # Read pasted inputs from the event payload (not from env: / ${{ inputs }}),
+          # so values are not echoed in the step header before masking.
+          USERNAME="$(trim "$(jq -r '.inputs.browserstack_username // empty' "$GITHUB_EVENT_PATH")")"
+          ACCESS_KEY="$(trim "$(jq -r '.inputs.browserstack_access_key // empty' "$GITHUB_EVENT_PATH")")"
+
+          if [ -z "$USERNAME" ]; then
+            fail "BrowserStack username is required."
           fi
-          if [ -z "${BROWSERSTACK_ACCESS_KEY:-}" ]; then
-            fail "Missing secret BROWSERSTACK_ACCESS_KEY."
+          if [ -z "$ACCESS_KEY" ]; then
+            fail "BrowserStack access key is required."
           fi
+          if [ "${#USERNAME}" -lt 3 ]; then
+            fail "BrowserStack username looks too short. Check what you pasted."
+          fi
+          if [ "${#ACCESS_KEY}" -lt 8 ]; then
+            fail "BrowserStack access key looks too short. Check what you pasted."
+          fi
+
+          echo "::add-mask::$USERNAME"
+          echo "::add-mask::$ACCESS_KEY"
+
+          {
+            echo "BROWSERSTACK_USERNAME=$USERNAME"
+            echo "BROWSERSTACK_ACCESS_KEY=$ACCESS_KEY"
+          } >> "$GITHUB_ENV"
 
           case "${{ inputs.suite }}" in
             testng-android) LABEL="TestNG + Android (TalkBack)"; PROJECT="sca-nexus-app-testng-android" ;;
@@ -86,7 +114,7 @@ jobs:
             echo "| Field | Value |"
             echo "| --- | --- |"
             echo "| Suite | $LABEL (\`${{ inputs.suite }}\`) |"
-            echo "| Credentials | repo secrets (auto-masked) |"
+            echo "| Credentials | provided (masked in logs) |"
             echo "| Status | starting… |"
           } >> "$GITHUB_STEP_SUMMARY"
 

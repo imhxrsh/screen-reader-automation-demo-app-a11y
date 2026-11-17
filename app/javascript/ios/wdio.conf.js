@@ -16,6 +16,25 @@ if (!username || !accessKey) {
   );
 }
 
+// Mirror BrowserStack's WDIO App Accessibility sample + Screen Reader report flags.
+// Docs: integrate-with-app-automate (WDIO) requires screenReaderAutomationReport under
+// accessibilityOptions; generate-screen-reader-report also documents screenReaderAutomation.
+// Do not place a cwd browserstack.yml here — the CLI path left App sessions at
+// srAutomation:false so projects never appeared on Screen Reader Automation.
+const accessibilityOptions = {
+  screenReaderAutomationReport: true,
+  screenReaderAutomation: {
+    autoReport: true,
+    linearNavigation: true,
+    linearNavigationTimeout: 300000,
+  },
+  wcagVersion: "wcag22aa",
+  scannerProcessingTimeout: 10,
+  includeIssueType: {
+    bestPractice: false,
+  },
+};
+
 exports.config = {
   user: username,
   key: accessKey,
@@ -27,19 +46,20 @@ exports.config = {
   capabilities: [
     {
       platformName: "iOS",
-      "appium:deviceName": "iPhone 16",
-      "appium:platformVersion": "18",
       "appium:automationName": "XCUITest",
       "bstack:options": {
+        deviceName: "iPhone 16",
+        osVersion: "18",
         projectName: "sca-nexus-app-javascript-ios",
         buildName: "browserstack-build-1",
         sessionName: "voiceover-smoke",
         debug: true,
         networkLogs: true,
+        source: "webdriverio:appium-sample-sdk:v1.0",
         // Required so VoiceOver executors work.
         voiceOver: true,
-        // WDIO App Accessibility sample pattern: also declare on caps.
         accessibility: true,
+        accessibilityOptions,
       },
     },
   ],
@@ -56,31 +76,14 @@ exports.config = {
   // wraps workers in xvfb-run and crashes on ubuntu-latest (write EINVAL).
   autoXvfb: false,
 
-  // Matches BrowserStack WDIO App Accessibility + Screen Reader docs.
-  // `app` on the service uploads the local binary and sets appium:app to bs://…
-  // Keep screenReaderAutomationReport (WDIO docs) + screenReaderAutomation
-  // (generate-report JS tab). Successful CI runs previously logged srAutomation:false
-  // with only the nested object, so projects never appeared on the SR dashboard.
   services: [
     [
       "browserstack",
       {
-        app: { path: iosApp },
+        // Same shape as BrowserStack's webdriverio-appium-app-browserstack sample.
+        app: iosApp,
         accessibility: true,
-        accessibilityOptions: {
-          // Legacy flag called out on the WDIO integrate page.
-          screenReaderAutomationReport: true,
-          screenReaderAutomation: {
-            autoReport: true,
-            linearNavigation: true,
-            linearNavigationTimeout: 300000,
-          },
-          wcagVersion: "wcag22aa",
-          scannerProcessingTimeout: 10,
-          includeIssueType: {
-            bestPractice: false,
-          },
-        },
+        accessibilityOptions,
       },
     ],
   ],

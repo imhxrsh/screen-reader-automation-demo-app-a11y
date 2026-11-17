@@ -1,31 +1,6 @@
-# Loaded by @wdio/browserstack-service CLI from cwd as browserstack.yml.
-# Without this file, App Accessibility sessions stay at srAutomation:false and
-# never appear on https://app-accessibility.browserstack.com/screen-reader-automation
-userName: ${BROWSERSTACK_USERNAME}
-accessKey: ${BROWSERSTACK_ACCESS_KEY}
-
-framework: wdio
-app: ./apps/NexusDemo.apk
-
-platforms:
-  - platformName: android
-    deviceName: Samsung Galaxy S24
-    platformVersion: "14.0"
-
-parallelsPerPlatform: 1
-browserstackLocal: false
-buildName: browserstack-build-1
-projectName: sca-nexus-app-javascript-android
-debug: true
-networkLogs: true
-
-accessibility: true
-accessibilityOptions:
-  screenReaderAutomation:
-    autoReport: true
-    linearNavigation: true
-    linearNavigationTimeout: 300000
-  wcagVersion: wcag22aa
-  includeIssueType:
-    bestPractice: false
-  scannerProcessingTimeout: 10
+# UNUSED for WDIO App Accessibility Screen Reader reports.
+# Official WDIO App A11y sample configures accessibilityOptions only in wdio.conf.js.
+# Copying this file to cwd previously activated the BrowserStack CLI yml path and
+# left sessions at srAutomation:false (projects never appeared on
+# https://app-accessibility.browserstack.com/screen-reader-automation).
+# Kept only as a reference of the TestNG-equivalent keys.

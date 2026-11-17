@@ -5,7 +5,10 @@ loadEnv();
 
 const username = process.env.BROWSERSTACK_USERNAME;
 const accessKey = process.env.BROWSERSTACK_ACCESS_KEY;
-const iosApp = process.env.IOS_APP || "./apps/NexusDemo.ipa";
+const iosApp = path.resolve(
+  process.cwd(),
+  process.env.IOS_APP || path.join(__dirname, "../apps/NexusDemo.ipa")
+);
 
 if (!username || !accessKey) {
   throw new Error(
@@ -26,7 +29,6 @@ exports.config = {
       platformName: "iOS",
       "appium:deviceName": "iPhone 16",
       "appium:platformVersion": "18",
-      "appium:app": iosApp,
       "appium:automationName": "XCUITest",
       "bstack:options": {
         projectName: "sca-nexus-app-wdio-ios",
@@ -53,10 +55,12 @@ exports.config = {
   autoXvfb: false,
 
   // Matches BrowserStack docs JavaScript tab for screenReaderAutomation.
+  // `app` on the service uploads the local binary and sets appium:app to bs://…
   services: [
     [
       "browserstack",
       {
+        app: { path: iosApp },
         accessibility: true,
         accessibilityOptions: {
           screenReaderAutomation: {

@@ -5,7 +5,10 @@ loadEnv();
 
 const username = process.env.BROWSERSTACK_USERNAME;
 const accessKey = process.env.BROWSERSTACK_ACCESS_KEY;
-const androidApp = process.env.ANDROID_APP || "./apps/NexusDemo.apk";
+const androidApp = path.resolve(
+  process.cwd(),
+  process.env.ANDROID_APP || path.join(__dirname, "../apps/NexusDemo.apk")
+);
 
 if (!username || !accessKey) {
   throw new Error(
@@ -26,7 +29,6 @@ exports.config = {
       platformName: "Android",
       "appium:deviceName": "Samsung Galaxy S24",
       "appium:platformVersion": "14.0",
-      "appium:app": androidApp,
       "appium:automationName": "UiAutomator2",
       "bstack:options": {
         projectName: "sca-nexus-app-wdio-android",
@@ -51,10 +53,12 @@ exports.config = {
   autoXvfb: false,
 
   // Matches BrowserStack docs JavaScript tab for screenReaderAutomation.
+  // `app` on the service uploads the local binary and sets appium:app to bs://…
   services: [
     [
       "browserstack",
       {
+        app: { path: androidApp },
         accessibility: true,
         accessibilityOptions: {
           screenReaderAutomation: {

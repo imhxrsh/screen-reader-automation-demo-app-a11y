@@ -2,9 +2,9 @@
   "name": "sca-nexus-app-javascript",
   "version": "1.0.0",
   "private": true,
-  "description": "BrowserStack app screen reader samples (Node.js Android + WebdriverIO iOS)",
+  "description": "BrowserStack app screen reader samples (WebdriverIO + Appium)",
   "scripts": {
-    "test:android": "node android/run.js",
+    "test:android": "rm -f ./browserstack.yml && wdio run android/wdio.conf.js",
     "test:ios": "rm -f ./browserstack.yml && wdio run ios/wdio.conf.js"
   },
   "engines": {

@@ -25,7 +25,7 @@ on:
 # Choice labels (Actions UI shows the option values; README maps them):
 #   testng-android      → TestNG + Android (TalkBack)
 #   testng-ios          → TestNG + iOS (VoiceOver)
-#   javascript-android  → Node.js (webdriverio client, no WDIO runner) + Android (TalkBack)
+#   javascript-android  → WebdriverIO + Android (TalkBack)
 #   javascript-ios      → WebdriverIO + iOS (VoiceOver)
 #
 # Credentials are pasted as workflow_dispatch inputs. Do NOT map them through
@@ -98,7 +98,7 @@ jobs:
           case "${{ inputs.suite }}" in
             testng-android) LABEL="TestNG + Android (TalkBack)"; PROJECT="sca-nexus-app-testng-android" ;;
             testng-ios) LABEL="TestNG + iOS (VoiceOver)"; PROJECT="sca-nexus-app-testng-ios" ;;
-            javascript-android) LABEL="Node.js + Android (TalkBack)"; PROJECT="sca-nexus-app-javascript-android" ;;
+            javascript-android) LABEL="WebdriverIO + Android (TalkBack)"; PROJECT="sca-nexus-app-javascript-android" ;;
             javascript-ios) LABEL="WebdriverIO + iOS (VoiceOver)"; PROJECT="sca-nexus-app-javascript-ios" ;;
             *) fail "Unknown suite: ${{ inputs.suite }}" ;;
           esac
@@ -154,7 +154,7 @@ jobs:
         working-directory: app/testng/ios
         run: mvn -B test
 
-      - name: Run Node.js Android (TalkBack)
+      - name: Run WebdriverIO Android (TalkBack)
         id: run_js_android
         if: inputs.suite == 'javascript-android'
         working-directory: app/javascript

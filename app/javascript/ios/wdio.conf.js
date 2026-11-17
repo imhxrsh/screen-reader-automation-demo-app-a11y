@@ -16,18 +16,14 @@ if (!username || !accessKey) {
   );
 }
 
-// Mirror BrowserStack's WDIO App Accessibility sample + Screen Reader report flags.
-// Docs: integrate-with-app-automate (WDIO) requires screenReaderAutomationReport under
-// accessibilityOptions; generate-screen-reader-report also documents screenReaderAutomation.
-// Do not place a cwd browserstack.yml here — the CLI path left App sessions at
-// srAutomation:false so projects never appeared on Screen Reader Automation.
-// Shape mirrors the working TestNG browserstack.yml (autoReport + linearNavigation).
+// Same shape as TestNG browserstack.yml / Android WDIO. Do not place a cwd
+// browserstack.yml here — the CLI path left App sessions at srAutomation:false.
 const accessibilityOptions = {
+  screenReaderAutomationReport: true,
   screenReaderAutomation: {
     autoReport: true,
-    // Standard mode (viewport only). linearNavigation:true made end-of-test
-    // appAllyScan hang past connectionRetryTimeout and blow the mocha timeout.
-    linearNavigation: false,
+    linearNavigation: true,
+    linearNavigationTimeout: 300000,
   },
   wcagVersion: "wcag22aa",
   scannerProcessingTimeout: 10,
@@ -59,6 +55,8 @@ exports.config = {
         source: "webdriverio:appium-sample-sdk:v1.0",
         // Required so VoiceOver executors work.
         voiceOver: true,
+        accessibility: true,
+        accessibilityOptions,
       },
     },
   ],
@@ -66,8 +64,8 @@ exports.config = {
   logLevel: "info",
   framework: "mocha",
   reporters: ["spec"],
-  // App a11y / screen-reader scans can exceed the WDIO default (120s).
-  connectionRetryTimeout: 240000,
+  // Must exceed linearNavigationTimeout so end-of-test appAllyScan can finish.
+  connectionRetryTimeout: 600000,
   connectionRetryCount: 2,
   mochaOpts: {
     ui: "bdd",
@@ -82,7 +80,6 @@ exports.config = {
     [
       "browserstack",
       {
-        // Same shape as BrowserStack's webdriverio-appium-app-browserstack sample.
         app: iosApp,
         accessibility: true,
         accessibilityOptions,

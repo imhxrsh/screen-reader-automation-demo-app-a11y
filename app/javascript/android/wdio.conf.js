@@ -16,14 +16,15 @@ if (!username || !accessKey) {
   );
 }
 
-// Same shape as the WDIO run that published to Screen Reader Automation
-// (thBuildId ge24h0r6ngzper3vthkme7zesmw6yubaqlxf3wzi / "captures spoken output after navigate_next").
-// linearNavigation stays false so end-of-test appAllyScan does not exceed CI timeouts.
+// Same shape as TestNG browserstack.yml. linearNavigation:true is required for a
+// full Screen Reader Automation report (autoReport alone can leave "Failed to
+// generate report" on the dashboard).
 const accessibilityOptions = {
   screenReaderAutomationReport: true,
   screenReaderAutomation: {
     autoReport: true,
-    linearNavigation: false,
+    linearNavigation: true,
+    linearNavigationTimeout: 300000,
   },
   wcagVersion: "wcag22aa",
   scannerProcessingTimeout: 10,
@@ -62,7 +63,8 @@ exports.config = {
   logLevel: "info",
   framework: "mocha",
   reporters: ["spec"],
-  connectionRetryTimeout: 240000,
+  // Must exceed linearNavigationTimeout so end-of-test appAllyScan can finish.
+  connectionRetryTimeout: 600000,
   connectionRetryCount: 2,
   mochaOpts: {
     ui: "bdd",

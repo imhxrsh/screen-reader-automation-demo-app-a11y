@@ -188,7 +188,7 @@ jobs:
             echo
             echo "### View the screen reader report"
             echo
-            echo "1. Open the [App Accessibility dashboard](https://app-accessibility.browserstack.com/)."
+            echo "1. Open [Screen Reader Automation](https://app-accessibility.browserstack.com/screen-reader-automation)."
             echo "2. Find project **\`${BS_PROJECT}\`**, build **\`browserstack-build-1\`**."
-            echo "3. Open the Screen Reader report for this run."
+            echo "3. Open the build → **ScreenReader Output**."
           } >> "$GITHUB_STEP_SUMMARY"

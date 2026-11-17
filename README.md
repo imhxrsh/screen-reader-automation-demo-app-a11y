@@ -41,8 +41,8 @@ Nexus Demo binaries are already in the repo (`apps/NexusDemo.apk` / `apps/NexusD
 ### 2. View results
 
 1. Open the finished workflow run → **Summary** (pass/fail + project name)  
-2. Open [App Accessibility](https://app-accessibility.browserstack.com/)  
-3. Select the project for your suite → build `browserstack-build-1` → **Screen Reader** report  
+2. Open [Screen Reader Automation](https://app-accessibility.browserstack.com/screen-reader-automation)  
+3. Select the project for your suite → build `browserstack-build-1` → **ScreenReader Output**  
 
 | Suite | BrowserStack project |
 | --- | --- |
@@ -98,7 +98,7 @@ npm run test:android   # TalkBack
 npm run test:ios       # VoiceOver
 ```
 
-JS suites use `@wdio/browserstack-service` with `accessibility` + `screenReaderAutomation` / `screenReaderAutomationReport` in `wdio.conf.js` (no cwd `browserstack.yml`).
+JS suites use WebdriverIO + `@wdio/browserstack-service` only (no plain Node.js Appium runner). Accessibility is configured in `android/wdio.conf.js` / `ios/wdio.conf.js` with `accessibility` + `screenReaderAutomation.autoReport` + `linearNavigation` (no cwd `browserstack.yml`).
 
 Do not commit `.env` (gitignored).
 

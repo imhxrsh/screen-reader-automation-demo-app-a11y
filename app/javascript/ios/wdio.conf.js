@@ -21,8 +21,8 @@ if (!username || !accessKey) {
 // accessibilityOptions; generate-screen-reader-report also documents screenReaderAutomation.
 // Do not place a cwd browserstack.yml here — the CLI path left App sessions at
 // srAutomation:false so projects never appeared on Screen Reader Automation.
+// Shape mirrors the working TestNG browserstack.yml (autoReport + linearNavigation).
 const accessibilityOptions = {
-  screenReaderAutomationReport: true,
   screenReaderAutomation: {
     autoReport: true,
     // Standard mode (viewport only). linearNavigation:true made end-of-test
@@ -59,8 +59,6 @@ exports.config = {
         source: "webdriverio:appium-sample-sdk:v1.0",
         // Required so VoiceOver executors work.
         voiceOver: true,
-        accessibility: true,
-        accessibilityOptions,
       },
     },
   ],

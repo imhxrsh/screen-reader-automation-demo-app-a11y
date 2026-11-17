@@ -1,6 +1,0 @@
-# UNUSED for WDIO App Accessibility Screen Reader reports.
-# Official WDIO App A11y sample configures accessibilityOptions only in wdio.conf.js.
-# Copying this file to cwd previously activated the BrowserStack CLI yml path and
-# left sessions at srAutomation:false (projects never appeared on
-# https://app-accessibility.browserstack.com/screen-reader-automation).
-# Kept only as a reference of the TestNG-equivalent keys.

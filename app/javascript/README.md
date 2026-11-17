@@ -1,6 +1,9 @@
-# Screen Reader Automation Demo - App A11y - Nexus Demo (WebdriverIO)
+# Screen Reader Automation Demo - App A11y - Nexus Demo (JavaScript)
 
-TalkBack / VoiceOver smokes for **Nexus Demo** via WebdriverIO + Appium.
+TalkBack / VoiceOver smokes for **Nexus Demo**.
+
+- **Android:** plain Node.js script (`android/run.js`) — Appium session via the `webdriverio` client, no WDIO runner / BrowserStack service.
+- **iOS:** WebdriverIO + Appium (VoiceOver executors).
 
 ```bash
 cp .env.example .env

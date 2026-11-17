@@ -8,7 +8,7 @@ Four runnable suites, same product flow:
 | --- | --- | --- | --- |
 | `testng-android` | Java + TestNG + Appium | Android | TalkBack |
 | `testng-ios` | Java + TestNG + Appium | iOS | VoiceOver |
-| `javascript-android` | JavaScript + WebdriverIO + Appium | Android | TalkBack |
+| `javascript-android` | Node.js + Appium (webdriverio client, no WDIO runner) | Android | TalkBack |
 | `javascript-ios` | JavaScript + WebdriverIO + Appium | iOS | VoiceOver |
 
 Each run launches **Nexus Demo**, opens **Standalone demo**, drives the native screen reader, asserts spoken / focus output, and generates a Screen Reader report on BrowserStack.
@@ -33,7 +33,7 @@ Workflow: [`.github/workflows/screen-reader.yml`](.github/workflows/screen-reade
 | --- | --- |
 | `testng-android` | TestNG + Android (TalkBack) |
 | `testng-ios` | TestNG + iOS (VoiceOver) |
-| `javascript-android` | WebdriverIO + Android (TalkBack) |
+| `javascript-android` | Node.js + Android (TalkBack) |
 | `javascript-ios` | WebdriverIO + iOS (VoiceOver) |
 
 Nexus Demo binaries are already in the repo (`apps/NexusDemo.apk` / `apps/NexusDemo.ipa`).
@@ -87,18 +87,18 @@ export BROWSERSTACK_ACCESS_KEY="your_access_key"
 mvn test
 ```
 
-### WebdriverIO - Android or iOS
+### JavaScript - Android (TalkBack) or iOS (VoiceOver)
 
 ```bash
 cd app/javascript
 cp .env.example .env
 # set BROWSERSTACK_USERNAME and BROWSERSTACK_ACCESS_KEY in .env
 npm install
-npm run test:android   # TalkBack
-npm run test:ios       # VoiceOver
+npm run test:android   # TalkBack via node android/run.js (plain Appium session)
+npm run test:ios       # VoiceOver via WebdriverIO
 ```
 
-JS suites arm Screen Reader reports from `wdio.conf.js` (`accessibility` + `screenReaderAutomationReport` / `screenReaderAutomation`), matching BrowserStack’s WDIO App Accessibility sample. Do not drop a cwd `browserstack.yml` next to the WDIO run — that CLI path left App sessions at `srAutomation:false` and kept projects off the Screen Reader Automation dashboard.
+Android JS opens a plain Appium session (no `@wdio/browserstack-service` / WDIO runner) with `accessibility` + `screenReaderAutomation.autoReport` on capabilities — the path that can publish to Screen Reader Automation. iOS still uses the WDIO runner for VoiceOver executors.
 
 Do not commit `.env` (gitignored).
 
@@ -110,7 +110,7 @@ Do not commit `.env` (gitignored).
 .github/workflows/screen-reader.yml   # recommended CI entrypoint
 app/testng/android/                   # Nexus Demo - TestNG - Android / TalkBack
 app/testng/ios/                       # Nexus Demo - TestNG - iOS / VoiceOver
-app/javascript/                       # Nexus Demo - WebdriverIO - Android + iOS
+app/javascript/                       # Nexus Demo - Node.js Android + WDIO iOS
 ```
 
 ---
